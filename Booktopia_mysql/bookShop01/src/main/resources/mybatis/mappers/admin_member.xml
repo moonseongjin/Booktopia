@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.admin.member">
+	<resultMap id="memberResult" type="MemberVO">
+		<result property="member_id" column="member_id" />
+		<result property="member_pw" column="member_pw" />
+		<result property="member_name" column="member_name" />
+		<result property="member_gender" column="member_gender" />
+
+		<result property="member_birth_y" column="member_birth_y" />
+		<result property="member_birth_m" column="member_birth_m" />
+		<result property="member_birth_d" column="member_birth_d" />
+
+		<result property="member_birth_gn" column="member_birth_gn" />
+		<result property="tel1" column="tel1" />
+		<result property="tel2" column="tel2" />
+		<result property="tel3" column="tel3" />
+
+		<result property="hp1" column="hp1" />
+		<result property="hp2" column="hp2" />
+		<result property="hp3" column="hp3" />
+		<result property="smssts_yn" column="smssts_yn" />
+		<result property="email1" column="email1" />
+		<result property="email2" column="email2" />
+		<result property="emailsts_yn" column="emailsts_yn" />
+
+		<result property="zipcode" column="zipcode" />
+		<result property="roadAddress" column="roadAddress" />
+		<result property="jibunAddress" column="jibunAddress" />
+		<result property="namujiAddress" column="namujiAddress" />
+		<result property="joinDate" column="joinDate" />
+		<result property="del_yn" column="del_yn" />
+	</resultMap>
+	<select id="listMember" resultMap="memberResult"
+		parameterType="java.util.HashMap">
+		select * from t_shopping_member
+	</select>
+
+	<select id="memberDetail" resultMap="memberResult"
+		parameterType="String">
+	    <![CDATA[
+		    SELECT * FROM t_shopping_member
+        WHERE member_id=#{member_id}
+    	]]>
+	</select>
+
+
+	<update id="modifyMemberInfo" parameterType="java.util.HashMap">
+		UPDATE t_shoping_member
+SET
+    member_pw = CASE WHEN #{member_pw} != '' AND #{member_pw} IS NOT NULL THEN #{member_pw} ELSE member_pw END,
+    member_gender = CASE WHEN #{member_gender} != '' AND #{member_gender} IS NOT NULL THEN #{member_gender} ELSE member_gender END,
+    member_birth_y = CASE WHEN #{member_birth_y} != '' AND #{member_birth_y} IS NOT NULL THEN #{member_birth_y} ELSE member_birth_y END,
+    member_birth_m = CASE WHEN #{member_birth_m} != '' AND #{member_birth_m} IS NOT NULL THEN #{member_birth_m} ELSE member_birth_m END,
+    member_birth_d = CASE WHEN #{member_birth_d} != '' AND #{member_birth_d} IS NOT NULL THEN #{member_birth_d} ELSE member_birth_d END,
+    tel1 = CASE WHEN #{tel1} != '' AND #{tel1} IS NOT NULL THEN #{tel1} ELSE tel1 END,
+    tel2 = CASE WHEN #{tel2} != '' AND #{tel2} IS NOT NULL THEN #{tel2} ELSE tel2 END,
+    tel3 = CASE WHEN #{tel3} != '' AND #{tel3} IS NOT NULL THEN #{tel3} ELSE tel3 END,
+    hp1 = CASE WHEN #{hp1} != '' AND #{hp1} IS NOT NULL THEN #{hp1} ELSE hp1 END,
+    hp2 = CASE WHEN #{hp2} != '' AND #{hp2} IS NOT NULL THEN #{hp2} ELSE hp2 END,
+    hp3 = CASE WHEN #{hp3} != '' AND #{hp3} IS NOT NULL THEN #{hp3} ELSE hp3 END,
+    smssts_yn = CASE WHEN #{smssts_yn} != '' AND #{smssts_yn} IS NOT NULL THEN #{smssts_yn} ELSE smssts_yn END,
+    email1 = CASE WHEN #{email1} != '' AND #{email1} IS NOT NULL THEN #{email1} ELSE email1 END,
+    email2 = CASE WHEN #{email2} != '' AND #{email2} IS NOT NULL THEN #{email2} ELSE email2 END,
+    emailsts_yn = CASE WHEN #{emailsts_yn} != '' AND #{emailsts_yn} IS NOT NULL THEN #{emailsts_yn} ELSE emailsts_yn END,
+    zipcode = CASE WHEN #{zipcode} != '' AND #{zipcode} IS NOT NULL THEN #{zipcode} ELSE zipcode END,
+    roadAddress = CASE WHEN #{roadAddress} != '' AND #{roadAddress} IS NOT NULL THEN #{roadAddress} ELSE roadAddress END,
+    jibunAddress = CASE WHEN #{jibunAddress} != '' AND #{jibunAddress} IS NOT NULL THEN #{jibunAddress} ELSE jibunAddress END,
+    namujiAddress = CASE WHEN #{namujiAddress} != '' AND #{namujiAddress} IS NOT NULL THEN #{namujiAddress} ELSE namujiAddress END,
+    del_yn = CASE WHEN #{del_yn} != '' AND #{del_yn} IS NOT NULL THEN #{del_yn} ELSE del_yn END
+WHERE
+    member_id = #{member_id};
+	</update>
+</mapper>
+

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+      PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.board">
+	<resultMap id="articlesResult" type="articleVO">
+		<result property="level" column="level" />
+		<result property="articleNO" column="articleNO" />
+		<result property="parentNO" column="parentNO" />
+		<result property="title" column="title" />
+		<result property="content" column="content" />
+		<result property="writeDate" column="writeDate" />
+		<result property="imageFileName" column="imageFileName" />
+	</resultMap>
+
+	<resultMap id="imgResult" type="imageVO">
+		<result property="imageFileNO" column="imageFileNO" />
+		<result property="articleNO" column="articleNO" />
+		<result property="imageFileName" column="imageFileName" />
+	</resultMap>
+
+	<select id="selectAllArticlesList" resultMap="articlesResult">
+    <![CDATA[
+   WITH RECURSIVE RecursiveCTE (articleNO, parentNO, title, content, writeDate, imageFileName, id, path, level) AS (
+    SELECT articleNO, parentNO, title, content, writeDate, imageFileName, id, CAST(writeDate AS CHAR(200)), 1
+    FROM t_board
+    WHERE parentNO = 0
+    UNION ALL
+    SELECT b.articleNO, b.parentNO, b.title, b.content, b.writeDate, b.imageFileName, b.id, CONCAT(c.path, ',', b.writeDate), c.level + 1
+    FROM RecursiveCTE c
+    JOIN t_board b
+    ON b.parentNO = c.articleNO
+)
+SELECT 
+    c1.level,
+    c1.articleNO,
+    c1.parentNO,
+    c1.title,
+    c1.content,
+    c1.writeDate,
+    c1.imageFileName,
+    c1.id
+FROM RecursiveCTE c1
+ORDER BY c1.path, c1.writeDate DESC;
+    ]]>
+	</select>
+
+	<insert id="insertNewArticle" parameterType="java.util.Map">
+    <![CDATA[
+    INSERT INTO t_board(articleNO, parentNO, title, content, imageFileName, id)
+    VALUES(#{articleNO}, #{parentNO}, #{title}, #{content}, #{imageFileName}, #{id});
+    ]]>
+	</insert>
+
+	<insert id="addReplyNewArticle" parameterType="java.util.Map">
+    <![CDATA[
+    INSERT INTO t_board(articleNO, title, content, imageFileName, id)
+    VALUES(#{articleNO}, #{title}, #{content}, #{imageFileName}, #{id});
+    ]]>
+	</insert>
+
+	<select id="selectNewArticleNO" resultType="int">
+    <![CDATA[
+    SELECT COALESCE(MAX(articleNO), 0) + 1 FROM t_board;
+    ]]>
+	</select>
+
+	<select id="selectArticle" resultType="articleVO"
+		parameterType="int">
+    <![CDATA[
+    SELECT * FROM t_board
+    WHERE articleNO = #{articleNO};
+    ]]>
+	</select>
+
+	<select id="selectId" resultType="articleVO" parameterType="int">
+    <![CDATA[
+    SELECT * FROM t_board
+    WHERE id = #{id};
+    ]]>
+	</select>
+
+	<update id="updateArticle" parameterType="java.util.Map">
+		UPDATE t_board
+		SET title = #{title}, content = #{content}
+		<if test="imageFileName != '' and imageFileName != null">
+			, imageFileName = #{imageFileName}
+		</if>
+		WHERE articleNO = #{articleNO};
+	</update>
+
+	<delete id="deleteArticle" parameterType="int">
+    <![CDATA[
+    DELETE FROM t_board
+    WHERE articleNO IN (
+        SELECT articleNO FROM t_board
+        WHERE articleNO = #{articleNO}
+        UNION ALL
+        SELECT articleNO FROM t_board
+        WHERE parentNO = #{articleNO}
+    );
+    ]]>
+	</delete>
+
+	<select id="selectNewImageFileNO" resultType="int">
+    <![CDATA[
+    SELECT COALESCE(MAX(imageFileNO), 0) FROM t_imageFile;
+    ]]>
+	</select>
+
+	<select id="selectImageFileList" resultMap="imgResult"
+		parameterType="int">
+    <![CDATA[
+    SELECT * FROM t_imageFile
+    WHERE articleNO = #{articleNO};
+    ]]>
+	</select>
+
+</mapper>

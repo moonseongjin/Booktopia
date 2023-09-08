@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.admin.goods">
+<!-- 리절트 맵 정의 -->	
+	<resultMap id="goodsResult" type="goodsVO">
+		<result property="goods_id" column="goods_id" />
+		<result property="goods_title" column="goods_title" />
+		<result property="goods_writer" column="goods_writer" />
+		<result property="goods_price" column="goods_price" />
+		<result property="goods_publisher" column="goods_publisher" />
+		
+		<result property="goods_status" column="goods_status" />
+		<result property="goods_sales_price" column="goods_sales_price" />
+		<result property="goods_published_date" column="goods_published_date" />
+		<result property="goods_total_page" column="goods_total_page" />
+		<result property="goods_isbn" column="goods_isbn" />
+		<result property="goods_delivery_price" column="goods_delivery_price" />
+		<result property="goods_delivery_date" column="goods_delivery_date" />
+		
+		<result property="goods_fileName" column="fileName" />
+		<result property="goods_sort" column="goods_sort" />
+		<result property="goods_writer_intro" column="goods_writer_intro" />
+		<result property="goods_intro" column="goods_intro" />
+		<result property="goods_contents_order" column="goods_contents_order" javaType="java.lang.String" jdbcType="CLOB"  />
+	</resultMap>	
+
+	<resultMap id="imageResult" type="ImageFileVO">
+	   <result property="goods_id" column="goods_id" />
+	   <result property="fileName" column="fileName" />
+	   <result property="reg_id" column="reg_id" />
+	   <result property="image_id" column="image_id" />
+	   <result property="fileType" column="fileType" />
+	</resultMap>
+	
+	<resultMap id="orderGoodsResult" type="OrderVO">
+		<result property="order_id" column="order_id" />
+		<result property="member_id" column="member_id" />
+		<result property="goods_id" column="goods_id" />
+		<result property="goods_title" column="goods_title" />
+		<result property="goods_sales_price" column="goods_sales_price" />
+		<result property="order_total_price" column="order_total_price" />
+		<result property="order_goods_qty" column="order_goods_qty" />
+		
+		<result property="orderer_name" column="orderer_name" />
+		<result property="receiver_name" column="receiver_name" />
+		<result property="receiver_hp1" column="receiver_hp1" />
+		<result property="receiver_hp2" column="receiver_hp2" />
+		<result property="receiver_hp3" column="receiver_hp3" />
+		
+		<result property="receiver_tel1" column="receiver_tel1" />
+		<result property="receiver_tel2" column="receiver_tel2" />
+		<result property="receiver_tel3" column="receiver_tel3" />
+		<result property="delivery_address" column="delivery_address" />
+		<result property="delivery_message" column="delivery_message" />
+		
+		<result property="delivery_method" column="delivery_method" />
+		<result property="gift_wrapping" column="gift_wrapping" />
+		<result property="pay_method" column="pay_method" />
+		<result property="card_com_name" column="card_com_name" />
+		<result property="card_pay_month" column="card_pay_month" />
+		
+		<result property="pay_orderer_hp_num" column="pay_orderer_hp_num" />
+		<result property="pay_order_time" column="pay_order_time" />
+		<result property="delivery_state" column="delivery_state" />
+		<result property="final_total_price" column="final_total_price" />
+		<result property="goods_qty" column="goods_qty" />
+		
+		<result property="goods_fileName" column="goods_fileName" />
+	</resultMap>
+	<insert id="insertNewGoods" parameterType="java.util.Map">
+    <![CDATA[
+    INSERT INTO t_shopping_goods (
+    goods_sort,
+    goods_title,
+    goods_writer,
+    goods_publisher,
+    goods_price,
+    goods_sales_price,
+    goods_point,
+    goods_published_date,
+    goods_total_page,
+    goods_isbn,
+    goods_delivery_price,
+    goods_delivery_date,
+    goods_status,
+    goods_writer_intro,
+    goods_intro,
+    goods_publisher_comment,
+    goods_recommendation,
+    goods_contents_order,
+    goods_id
+) VALUES (
+    #{goods_sort},
+    #{goods_title},
+    #{goods_writer},
+    #{goods_publisher},
+    #{goods_price},
+    #{goods_sales_price},
+    #{goods_point},
+    #{goods_published_date},
+    #{goods_total_page},
+    #{goods_isbn},
+    #{goods_delivery_price},
+    #{goods_delivery_date},
+    #{goods_status},
+    #{goods_writer_intro},
+    #{goods_intro},
+    #{goods_publisher_comment},
+    #{goods_recommendation},
+    #{goods_contents_order},
+    NULL 
+);
+    ]]>
+</insert>
+
+<select id="getLastInsertedGoodsId" resultType="int">
+    SELECT LAST_INSERT_ID()
+</select>
+
+
+		<insert id="insertGoodsImageFile" parameterType="imageFileVO">
+    <![CDATA[
+        INSERT INTO t_goods_detail_image (
+            goods_id,
+            fileName,
+            fileType,
+            reg_id
+        )
+        VALUES (
+            #{goods_id},
+            #{fileName},
+            #{fileType},
+            #{reg_id}
+        )
+    ]]>
+</insert>
+	<select id="selectNewGoodsList" resultMap="goodsResult" parameterType="java.util.Map">
+    <![CDATA[
+        SELECT * FROM (
+    SELECT 
+        (@row_number:=@row_number + 1) AS recNum,
+        goods_id,
+        goods_title,
+        goods_writer,
+        goods_publisher,
+        goods_sales_price,
+        DATE_FORMAT(goods_creDate, '%Y-%m-%d') AS goods_creDate,
+        DATE_FORMAT(goods_published_date, '%Y-%m-%d') AS goods_published_date
+    FROM (
+        SELECT 
+            goods_id,
+            goods_title,
+            goods_writer,
+            goods_publisher,
+            goods_sales_price,
+            goods_creDate,
+            goods_published_date
+        FROM t_shopping_goods
+        WHERE DATE_FORMAT(goods_creDate, '%Y-%m-%d') BETWEEN #{beginDate} AND #{endDate}
+        ORDER BY goods_creDate DESC
+    ) AS subquery
+    CROSS JOIN (SELECT @row_number:=0) AS dummy
+) AS results
+WHERE recNum BETWEEN (#{section}-1)*100 + (#{pageNum}-1)*10 + 1 AND (#{section}-1)*100 + (#{pageNum})*10;
+    ]]>
+</select>
+	
+	<select id="selectOrderGoodsList" resultMap="orderGoodsResult" parameterType="java.util.Map">
+    <![CDATA[
+        SELECT *
+        FROM (
+            SELECT rowNum as recNum, t.*
+            FROM (
+                SELECT *
+                FROM t_shopping_order 
+                WHERE DATE_FORMAT(pay_order_time, '%Y-%c-%e') BETWEEN #{beginDate} AND #{endDate}
+                AND 
+                CASE 
+                    WHEN #{search_type} = 'orderer_id' THEN orderer_id = #{search_word}
+                    WHEN #{search_type} = 'orderer_name' THEN orderer_name = #{search_word}
+                    WHEN #{search_type} = 'orderer_hp_num' THEN pay_orderer_hp_num = #{search_word}
+                    ELSE 1
+                END
+                ORDER BY PAY_ORDER_TIME DESC
+            ) t
+        ) results
+        WHERE recNum BETWEEN (#{section}-1)*100 + (#{pageNum}-1)*10 + 1 AND (#{section}-1)*100 + (#{pageNum})*10;
+    ]]>
+</select>
+	
+ 
+
+	
+	<select id="selectGoodsDetail" resultMap="goodsResult"   parameterType="String"  >
+	    <![CDATA[
+		     SELECT g.*, DATE_FORMAT(g.goods_published_date, '%Y-%c-%e') as goods_published_date, d.fileName
+        FROM t_shopping_goods g
+        JOIN t_goods_detail_image d ON g.goods_id = d.goods_id
+        WHERE d.filetype='main_image'
+        AND g.goods_id=#{goods_id}
+        ORDER BY g.goods_id;
+    	]]>
+	</select>
+	<select id="selectGoodsImageFileList" resultMap="imageResult"   parameterType="String"  >
+	    <![CDATA[
+		    	 SELECT *
+        FROM t_goods_detail_image 
+        WHERE goods_id=#{goods_id}
+        ORDER BY image_id ASC;
+    	]]>
+	</select>	
+	
+	
+<update id="updateGoodsInfo" parameterType="java.util.HashMap" >
+	   UPDATE t_shopping_goods
+SET 
+    goods_sort = CASE WHEN #{goods_sort} != '' AND #{goods_sort} IS NOT NULL THEN #{goods_sort} ELSE goods_sort END,
+    goods_title = CASE WHEN #{goods_title} != '' AND #{goods_title} IS NOT NULL THEN #{goods_title} ELSE goods_title END,
+    goods_writer = CASE WHEN #{goods_writer} != '' AND #{goods_writer} IS NOT NULL THEN #{goods_writer} ELSE goods_writer END,
+    goods_publisher = CASE WHEN #{goods_publisher} != '' AND #{goods_publisher} IS NOT NULL THEN #{goods_publisher} ELSE goods_publisher END,
+    goods_price = CASE WHEN #{goods_price} != '' AND #{goods_price} IS NOT NULL THEN #{goods_price} ELSE goods_price END,
+    goods_published_date = CASE WHEN #{goods_published_date} != '' AND #{goods_published_date} IS NOT NULL THEN #{goods_published_date} ELSE goods_published_date END,
+    goods_sales_price = CASE WHEN #{goods_sales_price} != '' AND #{goods_sales_price} IS NOT NULL THEN #{goods_sales_price} ELSE goods_sales_price END,
+    goods_point = CASE WHEN #{goods_point} != '' AND #{goods_point} IS NOT NULL THEN #{goods_point} ELSE goods_point END,
+    goods_page_total = CASE WHEN #{goods_page_total} != '' AND #{goods_page_total} IS NOT NULL THEN #{goods_page_total} ELSE goods_page_total END,
+    goods_isbn = CASE WHEN #{goods_isbn} != '' AND #{goods_isbn} IS NOT NULL THEN #{goods_isbn} ELSE goods_isbn END,
+    goods_delivery_price = CASE WHEN #{goods_delivery_price} != '' AND #{goods_delivery_price} IS NOT NULL THEN #{goods_delivery_price} ELSE goods_delivery_price END,
+    goods_delivery_date = CASE WHEN #{goods_delivery_date} != '' AND #{goods_delivery_date} IS NOT NULL THEN #{goods_delivery_date} ELSE goods_delivery_date END,
+    goods_status = CASE WHEN #{goods_status} != '' AND #{goods_status} IS NOT NULL THEN #{goods_status} ELSE goods_status END,
+    goods_writer_intro = CASE WHEN #{goods_writer_intro} != '' AND #{goods_writer_intro} IS NOT NULL THEN #{goods_writer_intro} ELSE goods_writer_intro END,
+    goods_intro = CASE WHEN #{goods_intro} != '' AND #{goods_intro} IS NOT NULL THEN #{goods_intro} ELSE goods_intro END,
+    publisher_comment = CASE WHEN #{publisher_comment} != '' AND #{publisher_comment} IS NOT NULL THEN #{publisher_comment} ELSE publisher_comment END,
+    recommendation = CASE WHEN #{recommendation} != '' AND #{recommendation} IS NOT NULL THEN #{recommendation} ELSE recommendation END,
+    goods_contents_order = CASE WHEN #{goods_contents_order} != '' AND #{goods_contents_order} IS NOT NULL THEN #{goods_contents_order} ELSE goods_contents_order END
+WHERE 
+    goods_id = #{goods_id};
+	</update>	
+	<update id="updateGoodsImage" parameterType="imageFileVO">
+		 UPDATE t_goods_detail_image
+    SET fileName=#{fileName}
+    WHERE goods_id=#{goods_id} AND image_id=#{image_id}
+	</update>
+	
+	<delete id="deleteGoodsImage" parameterType="String">
+	    DELETE FROM t_goods_detail_image
+    WHERE image_id=#{image_id}
+	</delete>
+	
+<update id="updateOrderGoods" parameterType="java.util.HashMap" >
+	   update t_shopping_order
+	    <set> 
+	      <if test=" delivery_state!='' and delivery_state!=null">
+	        delivery_state=#{delivery_state},
+	      </if>
+	      <if test=" delivery_address!='' and delivery_address!=null">
+	        delivery_address=#{delivery_address},
+	      </if>
+	    </set>
+	    where 
+	    order_id=#{order_id}
+	
+	</update>		
+</mapper>
+

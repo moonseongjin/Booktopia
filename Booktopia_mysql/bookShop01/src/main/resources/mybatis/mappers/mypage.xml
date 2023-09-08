@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.mypage">
+	<!-- 리절트 맵 정의 -->
+	<resultMap id="orderGoodsResult" type="orderVO">
+		<result property="order_id" column="order_id" />
+		<result property="member_id" column="member_id" />
+		<result property="goods_id" column="goods_id" />
+		<result property="goods_title" column="goods_title" />
+		<result property="goods_sales_price" column="goods_sales_price" />
+		<result property="order_total_price" column="order_total_price" />
+		<result property="order_goods_qty" column="order_goods_qty" />
+
+		<result property="orderer_name" column="orderer_name" />
+		<result property="receiver_name" column="receiver_name" />
+		<result property="receiver_hp1" column="receiver_hp1" />
+		<result property="receiver_hp2" column="receiver_hp2" />
+		<result property="receiver_hp3" column="receiver_hp3" />
+
+		<result property="receiver_tel1" column="receiver_tel1" />
+		<result property="receiver_tel2" column="receiver_tel2" />
+		<result property="receiver_tel3" column="receiver_tel3" />
+		<result property="delivery_address" column="delivery_address" />
+		<result property="delivery_message" column="delivery_message" />
+
+		<result property="delivery_method" column="delivery_method" />
+		<result property="gift_wrapping" column="gift_wrapping" />
+		<result property="pay_method" column="pay_method" />
+		<result property="card_com_name" column="card_com_name" />
+		<result property="card_pay_month" column="card_pay_month" />
+
+		<result property="pay_orderer_hp_num"
+			column="pay_orderer_hp_num" />
+		<result property="pay_order_time" column="pay_order_time" />
+		<result property="delivery_state" column="delivery_state" />
+		<result property="final_total_price" column="final_total_price" />
+		<result property="goods_qty" column="goods_qty" />
+
+		<result property="goods_fileName" column="goods_fileName" />
+	</resultMap>
+
+
+	<select id="selectMyOrderGoodsList" resultMap="orderGoodsResult"
+		parameterType="String">
+    <![CDATA[
+    SELECT * FROM t_shopping_order
+    WHERE member_id=#{member_id}
+    ORDER BY pay_order_time DESC
+    ]]>
+	</select>
+
+	<select id="memberDelete" resultMap="orderGoodsResult"
+		parameterType="String">
+    <![CDATA[
+    DELETE FROM t_shopping_member WHERE member_id=#{member_id};
+    ]]>
+	</select>
+
+	<select id="selectMyOrderInfo" resultMap="orderGoodsResult"
+		parameterType="String">
+    <![CDATA[
+    SELECT * FROM t_shopping_order
+    WHERE order_id=#{order_id}
+    ]]>
+	</select>
+
+	<select id="selectMyOrderHistoryList"
+		resultMap="orderGoodsResult" parameterType="java.util.Map">
+    <![CDATA[
+    SELECT *
+FROM t_shopping_order
+WHERE member_id = #{member_id}
+AND DATE_FORMAT(pay_order_time, '%Y-%m-%d') BETWEEN #{beginDate} AND #{endDate}
+ORDER BY pay_order_time DESC;
+    ]]>
+	</select>
+
+	<update id="updateMyInfo" parameterType="java.util.HashMap">
+    <![CDATA[
+  UPDATE t_shopping_member
+SET
+    member_pw = CASE WHEN #{member_pw} != '' AND #{member_pw} IS NOT NULL THEN #{member_pw} ELSE member_pw END,
+    member_gender = CASE WHEN #{member_gender} != '' AND #{member_gender} IS NOT NULL THEN #{member_gender} ELSE member_gender END,
+    member_birth_y = CASE WHEN #{member_birth_y} != '' AND #{member_birth_y} IS NOT NULL THEN #{member_birth_y} ELSE member_birth_y END,
+    member_birth_m = CASE WHEN #{member_birth_m} != '' AND #{member_birth_m} IS NOT NULL THEN #{member_birth_m} ELSE member_birth_m END,
+    member_birth_d = CASE WHEN #{member_birth_d} != '' AND #{member_birth_d} IS NOT NULL THEN #{member_birth_d} ELSE member_birth_d END,
+    tel1 = CASE WHEN #{tel1} != '' AND #{tel1} IS NOT NULL THEN #{tel1} ELSE tel1 END,
+    tel2 = CASE WHEN #{tel2} != '' AND #{tel2} IS NOT NULL THEN #{tel2} ELSE tel2 END,
+    tel3 = CASE WHEN #{tel3} != '' AND #{tel3} IS NOT NULL THEN #{tel3} ELSE tel3 END,
+    hp1 = CASE WHEN #{hp1} != '' AND #{hp1} IS NOT NULL THEN #{hp1} ELSE hp1 END,
+    hp2 = CASE WHEN #{hp2} != '' AND #{hp2} IS NOT NULL THEN #{hp2} ELSE hp2 END,
+    hp3 = CASE WHEN #{hp3} != '' AND #{hp3} IS NOT NULL THEN #{hp3} ELSE hp3 END,
+    smssts_yn = CASE WHEN #{smssts_yn} != '' AND #{smssts_yn} IS NOT NULL THEN #{smssts_yn} ELSE smssts_yn END,
+    email1 = CASE WHEN #{email1} != '' AND #{email1} IS NOT NULL THEN #{email1} ELSE email1 END,
+    email2 = CASE WHEN #{email2} != '' AND #{email2} IS NOT NULL THEN #{email2} ELSE email2 END,
+    emailsts_yn = CASE WHEN #{emailsts_yn} != '' AND #{emailsts_yn} IS NOT NULL THEN #{emailsts_yn} ELSE emailsts_yn END,
+    zipcode = CASE WHEN #{zipcode} != '' AND #{zipcode} IS NOT NULL THEN #{zipcode} ELSE zipcode END,
+    roadAddress = CASE WHEN #{roadAddress} != '' AND #{roadAddress} IS NOT NULL THEN #{roadAddress} ELSE roadAddress END,
+    jibunAddress = CASE WHEN #{jibunAddress} != '' AND #{jibunAddress} IS NOT NULL THEN #{jibunAddress} ELSE jibunAddress END,
+    namujiAddress = CASE WHEN #{namujiAddress} != '' AND #{namujiAddress} IS NOT NULL THEN #{namujiAddress} ELSE namujiAddress END
+WHERE
+    member_id = #{member_id};
+    ]]>
+	</update>
+
+	<select id="selectMyDetailInfo" resultType="memberVO"
+		parameterType="String">
+    <![CDATA[
+    SELECT * FROM t_shopping_member
+    WHERE member_id=#{member_id}
+    ]]>
+	</select>
+
+	<update id="updateMyOrderCancel" parameterType="String">
+    <![CDATA[
+    UPDATE t_shopping_order
+    SET delivery_state='cancel_order'
+    WHERE order_id=#{order_id}
+    ]]>
+	</update>
+
+
+</mapper>
