@@ -6,3 +6,5 @@ Board
 </p>
 
 <img src="https://github.com/moonseongjin/Booktopia/assets/124224738/38a5c52a-4649-478d-a02e-e1249fb817ae">
+
+https://github.com/moonseongjin/Booktopia/assets/124224738/38a5c52a-4649-478d-a02e-e1249fb817ae
